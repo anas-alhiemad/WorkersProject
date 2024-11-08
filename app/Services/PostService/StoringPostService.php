@@ -8,6 +8,8 @@ use App\Notifications\AdminPost;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
+
+
  class StoringPostService{
 
     protected $model;
@@ -31,15 +33,23 @@ use Illuminate\Support\Facades\Notification;
 
     function storePostPhotos($request, $postId)
     {
-        $photos = $request->photos;
-        foreach ($photos as $Photo) {
-            $postPhotos = new PostPhotos();
-            $postPhotos->post_id = $postId;
-            $postPhotos->photo = $photo->store('posts');
-            $postPhotos->save();
-        }
+                        
+            foreach ($request->file('photos') as $photo) {
+                       $postPhotos = new PostPhotos();
+                       $postPhotos -> postId = $postId;
+                       $postPhotos -> photo = $photo -> store('photos');
+                       $postPhotos -> save();
+                    }
     }
 
+
+
+    function sendAdminNotification($post)
+    {
+        $admins = Admin::get();
+
+        Notification::send($admins, new AdminPost(auth()->guard('worker')->user(), $post));
+    }
 
     function store($request)
     {
@@ -49,7 +59,7 @@ use Illuminate\Support\Facades\Notification;
             if ($request->hasFile('photos')) {
                 $postPhotos = $this->storePostPhotos($request, $post->id);
             }
-          //  $this->sendAdminNotification($post);
+            $this->sendAdminNotification($post);
             DB::commit();
             return response()->json([
                 "message" => "post has been created successfuly ,your price after discount is {$post->price}"

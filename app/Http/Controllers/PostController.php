@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoringPostRequest;
 use App\Services\PostService\StoringPostService;
+
+
+
 class PostController extends Controller
 {
     public function store(StoringPostRequest $request){
@@ -33,4 +37,21 @@ class PostController extends Controller
     //             return $e->getMessage();
     //         }
      }
+
+
+
+    public function index(){
+        $posts = Post::all();
+        return response()->json([
+            "posts" => $posts
+        ]);
+    } 
+
+
+    public function approved(){
+        $posts = Post::where('status','approved')->get()->makeHidden('status');
+        return response()->json([
+            "posts" => $posts
+        ]);
+    } 
 }
